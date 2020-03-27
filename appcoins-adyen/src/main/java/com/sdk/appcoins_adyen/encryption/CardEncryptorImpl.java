@@ -4,21 +4,20 @@ import com.sdk.appcoins_adyen.card.Card;
 import com.sdk.appcoins_adyen.card.EncryptedCard;
 import com.sdk.appcoins_adyen.exceptions.EncrypterException;
 import com.sdk.appcoins_adyen.exceptions.EncryptionException;
+import com.sdk.appcoins_adyen.utils.StringUtil;
 import java.util.Date;
 
-public final class CardEncryptorImpl {
+public final class CardEncryptorImpl implements CardEncryptor {
 
-  private String publicKey;
-
-  public CardEncryptorImpl(String publicKey) {
-    this.publicKey = publicKey;
+  public CardEncryptorImpl() {
   }
 
-  public EncryptedCard encryptFields(String number, Integer month, Integer year, String code)
-      throws EncryptionException {
+  public EncryptedCard encryptFields(String number, Integer month, Integer year, String code,
+      String publicKey) throws EncryptionException {
     try {
       Date generationTime = new Date();
-      String cardNumber = number;
+      final String normalizedNumber = StringUtil.normalize(number);
+      String cardNumber = normalizedNumber;
       String encryptedNumber = null;
       if (cardNumber != null) {
         try {
@@ -73,7 +72,8 @@ public final class CardEncryptorImpl {
     }
   }
 
-  public String encryptStoredPaymentFields(String securityCode, String paymentId, String type) {
+  public String encryptStoredPaymentFields(String securityCode, String paymentId, String type,
+      String publicKey) {
     Date generationTime = new Date();
     String encryptedSecurityCode = "";
     try {

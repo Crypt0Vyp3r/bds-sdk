@@ -25,7 +25,7 @@ import com.appcoins.sdk.billing.models.billing.TransactionInformation;
 import com.appcoins.sdk.billing.models.billing.TransactionResponse;
 import com.appcoins.sdk.billing.service.adyen.AdyenPaymentMethod;
 import com.sdk.appcoins_adyen.card.EncryptedCard;
-import com.sdk.appcoins_adyen.encryption.CardEncryptorImpl;
+import com.sdk.appcoins_adyen.encryption.Encryptor;
 import com.sdk.appcoins_adyen.models.ExpiryDate;
 import com.sdk.appcoins_adyen.utils.CardValidationUtils;
 import com.sdk.appcoins_adyen.utils.RedirectUtils;
@@ -83,16 +83,16 @@ class AdyenPaymentPresenter {
     fragmentView.showLoading();
     fragmentView.lockRotation();
     fragmentView.disableBack();
-    CardEncryptorImpl cardEncryptor = new CardEncryptorImpl(BuildConfig.ADYEN_PUBLIC_KEY);
     ExpiryDate mExpiryDate = CardValidationUtils.getDate(expiryDate);
     String encryptedCard;
     if (storedPaymentId.equals("")) {
       EncryptedCard encryptedCardModel =
-          cardEncryptor.encryptFields(cardNumber, mExpiryDate.getExpiryMonth(),
-              mExpiryDate.getExpiryYear(), cvv);
+          Encryptor.INSTANCE.encryptFields(cardNumber, mExpiryDate.getExpiryMonth(),
+              mExpiryDate.getExpiryYear(), cvv, BuildConfig.ADYEN_PUBLIC_KEY);
       encryptedCard = new EncryptedCardMapper().map(encryptedCardModel);
     } else {
-      encryptedCard = cardEncryptor.encryptStoredPaymentFields(cvv, storedPaymentId, "scheme");
+      encryptedCard = Encryptor.INSTANCE.encryptStoredPaymentFields(cvv, storedPaymentId, "scheme",
+          BuildConfig.ADYEN_PUBLIC_KEY);
     }
     analytics.sendConfirmationEvent(adyenPaymentInfo, BillingAnalytics.EVENT_BUY);
     makePayment(encryptedCard, serverFiatPrice, serverCurrency);
