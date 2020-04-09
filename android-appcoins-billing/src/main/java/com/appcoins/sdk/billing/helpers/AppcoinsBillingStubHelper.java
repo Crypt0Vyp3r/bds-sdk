@@ -244,7 +244,7 @@ public final class AppcoinsBillingStubHelper implements AppcoinsBilling, Seriali
       if (!WalletUtils.hasWalletInstalled()) {
         return AppcoinsBillingStubHelper.getInstance();
       } else {
-        if (UriCommunicationAppcoinsBilling.class.getSimpleName()
+        if (BuildConfig.URI_COMMUNICATION && UriCommunicationAppcoinsBilling.class.getSimpleName()
             .equals(componentName)) {
           SyncIpcMessageRequester messageRequester =
               MessageRequesterFactory.create(WalletUtils.getContext(),
