@@ -21,6 +21,7 @@ import com.appcoins.sdk.billing.SkuDetails;
 import com.appcoins.sdk.billing.SkuDetailsResult;
 import com.appcoins.sdk.billing.UriCommunicationAppcoinsBilling;
 import com.appcoins.sdk.billing.WSServiceController;
+import com.appcoins.sdk.billing.WalletBinderUtil;
 import com.appcoins.sdk.billing.listeners.StartPurchaseAfterBindListener;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -241,16 +242,15 @@ public final class AppcoinsBillingStubHelper implements AppcoinsBilling, Seriali
   public static abstract class Stub {
 
     public static AppcoinsBilling asInterface(IBinder service, String componentName) {
-      if (!WalletUtils.hasWalletInstalled()) {
+      if (WalletBinderUtil.bindType == BindType.WALLET_NOT_INSTALLED
+          || !WalletUtils.hasWalletInstalled()) {
         return AppcoinsBillingStubHelper.getInstance();
       } else {
-        if (BuildConfig.URI_COMMUNICATION && UriCommunicationAppcoinsBilling.class.getSimpleName()
-            .equals(componentName)) {
-          SyncIpcMessageRequester messageRequester =
-              MessageRequesterFactory.create(WalletUtils.getContext(),
-                  BuildConfig.BDS_WALLET_PACKAGE_NAME,
-                  "appcoins://billing/communication/processor/1",
-                  "appcoins://billing/communication/requester/1", MESSAGE_RESPONSE_WAIT_TIMEOUT);
+        if (WalletBinderUtil.bindType == BindType.URI_CONNECTION) {
+          SyncIpcMessageRequester messageRequester = MessageRequesterFactory.create(
+              new LifecycleActivityProvider(WalletUtils.getContext()),
+              BuildConfig.BDS_WALLET_PACKAGE_NAME, "appcoins://billing/communication/processor/1",
+              "appcoins://billing/communication/requester/1", MESSAGE_RESPONSE_WAIT_TIMEOUT);
           return new UriCommunicationAppcoinsBilling(messageRequester);
         } else {
           return AppcoinsBilling.Stub.asInterface(service);
